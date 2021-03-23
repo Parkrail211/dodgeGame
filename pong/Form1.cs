@@ -13,8 +13,6 @@ namespace pong
 {
     public partial class Form1 : Form
     {
-        int currentTick = 0;
-
         int paddle1X = 200;
 
 
@@ -23,34 +21,42 @@ namespace pong
 
 
 
-        int paddleWidth = 10;
-        int paddleHeight = 60;
+        int paddleWidth = 5;
+        int paddleHeight = 5;
+        int p1Score = 0;
+        int p2Score = 0;
 
 
-        int ballX = 50;
-        int ballY = 200;
+        int ballX = 100;
+        int ballY = 390;
+        int ball2X = 500;
+        int ball2Y = 390;
         int ballSpeed = 6;
         int paddleSpeed = 6;
 
+        int timeLeft = 0; 
         int ballWidth = 10;
         int ballHeight = 10;
 
-        List<int> p1Y = new List<int>();
-        List<int> p2Y = new List<int>();
+        List<int> asteroidsX = new List<int>();
+        List<int> asteroidsY = new List<int>();
+        List<int> asteroidsDirection = new List<int>();
+
 
 
         bool wDown = false;
         bool sDown = false;
-        bool dDown = false;
-        bool aDown = false;
+        bool upDown = false;
+        bool downDown = false;
         bool menu = true;
+        bool gen = true;
 
 
-
+        Random rnd = new Random();
         SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
         SolidBrush blackBrush = new SolidBrush(Color.Black);
         SolidBrush whiteBrush = new SolidBrush(Color.White);
-        Font screenFont = new Font("Consolas", 12);
+
         public Form1()
         {
             InitializeComponent();
@@ -66,25 +72,17 @@ namespace pong
                 case Keys.S:
                     sDown = true;
                     break;
-                case Keys.D:
-                    dDown = true;
+                case Keys.Up:
+                    upDown = true;
                     break;
-                case Keys.A:
-                    aDown = true;
+                case Keys.Down:
+                    downDown = true;
                     break;
                 case Keys.Space:
                     if (menu)
                     {
-                        gameTimer.Enabled = true;
-                        menu = false;
-                        this.BackColor = Color.Black;
-                        winLoseLabel.Visible = false;
-                        buttonLabel.Visible = false;
-                        p1Y.Clear();
-                        p2Y.Clear();
-                        ballX = 50;
-                        ballY = 200;
-                       
+                        closeMenu();
+
                     }
                     break;
                 case Keys.Escape:
@@ -106,11 +104,11 @@ namespace pong
                 case Keys.S:
                     sDown = false;
                     break;
-                case Keys.D:
-                    dDown = false;
+                case Keys.Up:
+                    upDown = false;
                     break;
-                case Keys.A:
-                    aDown = false;
+                case Keys.Down:
+                    downDown = false;
                     break;
             }
         }
@@ -119,12 +117,30 @@ namespace pong
 
         private void gameTimer_Tick(object sender, EventArgs e)
         {
-            currentTick++;
-
-            if (currentTick % 20 == 1)
+            if (timeLeft >= 400)
             {
-                p1Y.Add(400);
-                p2Y.Add(-60);
+                if (p1Score > p2Score) {openMenu("Player One Wins");}
+                else if (p1Score < p2Score) { openMenu("Player Two Wins"); }
+                else { openMenu("Tie"); }
+
+            }
+
+            if (gen)
+            {
+                for (int loop = 0; loop <= 24; loop++)
+                {
+                    asteroidsX.Add(rnd.Next(0, 601));
+                    asteroidsY.Add(rnd.Next(50, 351));
+                    if (rnd.Next(0, 2) == 0)
+                    {
+                        asteroidsDirection.Add(-1);
+                    }
+                    else
+                    {
+                        asteroidsDirection.Add(1);
+                    }
+                    gen = false;
+                }
             }
 
             //move player 1 
@@ -138,57 +154,68 @@ namespace pong
                 ballY += ballSpeed;
             }
 
-            if (dDown == true && ballX < 591)
+            if (upDown == true && ball2Y > 0)
             {
-                ballX += ballSpeed;
+                ball2Y -= ballSpeed;
             }
 
-            if (aDown == true && ballX > 0)
+            if (downDown == true && ball2Y < 390)
             {
-                ballX -= ballSpeed;
+                ball2Y += ballSpeed;
             }
 
-            for (int loop = 0; loop < p1Y.Count(); loop++)
+            for (int loop = 0; loop < asteroidsX.Count(); loop++)
             {
-                p1Y[loop] -= paddleSpeed;
-            }
-            for (int loop = 0; loop < p1Y.Count(); loop++)
-            {
-                p2Y[loop] += paddleSpeed;
+                asteroidsX[loop] += paddleSpeed * asteroidsDirection[loop];
             }
 
+            for (int loop = 0; loop < asteroidsX.Count(); loop++)
+            {
+                if (asteroidsX[loop] <= 0 || asteroidsX[loop] >= 600)
+                {
+                    asteroidsDirection[loop] = asteroidsDirection[loop] * -1;
+                }
+            }
 
 
             //create Rectangles of objects on screen to be used for collision detection
 
             Rectangle ball = new Rectangle(ballX, ballY, ballWidth, ballHeight);
+            Rectangle ball2 = new Rectangle(ball2X, ball2Y, ballWidth, ballHeight);
 
-            for (int loop = 0; loop < p1Y.Count(); loop++)
+
+            for (int loop = 0; loop < asteroidsX.Count(); loop++)
             {
-                Rectangle paddle1 = new Rectangle(paddle1X, p1Y[loop], paddleWidth, paddleHeight);
-                Rectangle paddle2 = new Rectangle(paddle2X, p2Y[loop], paddleWidth, paddleHeight);
+                Rectangle paddle1 = new Rectangle(asteroidsX[loop], asteroidsY[loop], paddleWidth, paddleHeight);
 
-                if (ball.IntersectsWith(paddle1) || ball.IntersectsWith(paddle2))
+
+                if (ball.IntersectsWith(paddle1))
                 {
-                    gameTimer.Enabled = false;
-                    menu = true;
-                    this.BackColor = Color.White;
-                    winLoseLabel.Visible = true;
-                    winLoseLabel.Text = "Loser!!!";
-                    buttonLabel.Visible = true;
+                    ballX = 100;
+                    ballY = 390;
+                }
+                if (ball2.IntersectsWith(paddle1))
+                {
+                    ball2X = 500;
+                    ball2Y = 390;
                 }
             }
 
-            if (ballX > 590)
+            if (ballY <= 0)
             {
-                gameTimer.Enabled = false;
-                menu = true;
-                this.BackColor = Color.White;
-                winLoseLabel.Visible = true;
-                winLoseLabel.Text = "Winner!!!";
-                buttonLabel.Visible = true;
+                p1Score++;
+                p1ScoreLabel.Text = $"{p1Score}";
+                ballX = 100;
+                ballY = 390;
             }
 
+            if (ball2Y <= 0)
+            {
+                p2Score++;
+                p2ScoreLabel.Text = $"{p2Score}";
+                ball2X = 500;
+                ball2Y = 390;
+            }
 
 
 
@@ -207,31 +234,62 @@ namespace pong
             if (menu)
             {
 
-                e.Graphics.FillRectangle(whiteBrush, ballX, ballY, ballWidth, ballHeight);
-                for (int loop = 0; loop < p1Y.Count(); loop++)
+
+                for (int loop = 0; loop < asteroidsX.Count(); loop++)
                 {
-                    e.Graphics.FillRectangle(whiteBrush, paddle1X, p1Y[loop], paddleWidth, paddleHeight);
+                    e.Graphics.FillRectangle(whiteBrush, asteroidsX[loop], asteroidsY[loop], paddleWidth, paddleHeight);
                 }
-                for (int loop = 0; loop < p2Y.Count(); loop++)
-                {
-                    e.Graphics.FillRectangle(whiteBrush, paddle2X, p2Y[loop], paddleWidth, paddleHeight);
-                }
+
             }
- 
+
 
             else
             {
                 e.Graphics.FillRectangle(whiteBrush, ballX, ballY, ballWidth, ballHeight);
-                for (int loop = 0; loop < p1Y.Count(); loop++)
+                e.Graphics.FillRectangle(whiteBrush, ball2X, ball2Y, ballWidth, ballHeight);
+                for (int loop = 0; loop < asteroidsX.Count(); loop++)
                 {
-                    e.Graphics.FillRectangle(blueBrush, paddle1X, p1Y[loop], paddleWidth, paddleHeight);
-                }
-                for (int loop = 0; loop < p2Y.Count(); loop++)
-                {
-                    e.Graphics.FillRectangle(blueBrush, paddle2X, p2Y[loop], paddleWidth, paddleHeight);
+                    e.Graphics.FillRectangle(blueBrush, asteroidsX[loop], asteroidsY[loop], paddleWidth, paddleHeight);
                 }
 
+
             }
+            e.Graphics.FillRectangle(whiteBrush, 296, timeLeft, 8, 400);
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            timeLeft++;
+        }
+
+        private void openMenu(string text)
+        {
+            menu = true;
+            this.BackColor = Color.White;
+            winLoseLabel.Visible = true;
+            winLoseLabel.Text = text;
+            buttonLabel.Visible = true;
+            timer.Enabled = false;
+            timeLeft = 0;
+        }
+
+        private void closeMenu()
+        {
+            gameTimer.Enabled = true;
+            menu = false;
+            this.BackColor = Color.Black;
+            winLoseLabel.Visible = false;
+            buttonLabel.Visible = false;
+            asteroidsX.Clear();
+            asteroidsY.Clear();
+            gen = true;
+            timer.Enabled = true;
+
+            ballX = 50;
+            ballY = 390;
+            ball2X = 500;
+            ball2Y = 390;
+
         }
     }
 }
