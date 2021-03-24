@@ -45,6 +45,9 @@ namespace pong
             // 
             // winLoseLabel
             // 
+            this.winLoseLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.winLoseLabel.AutoSize = true;
             this.winLoseLabel.Enabled = false;
             this.winLoseLabel.Font = new System.Drawing.Font("Microsoft Sans Serif", 48F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -58,6 +61,9 @@ namespace pong
             // 
             // buttonLabel
             // 
+            this.buttonLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonLabel.AutoSize = true;
             this.buttonLabel.BackColor = System.Drawing.Color.Transparent;
             this.buttonLabel.Location = new System.Drawing.Point(147, 227);
@@ -68,6 +74,7 @@ namespace pong
             // 
             // p2ScoreLabel
             // 
+            this.p2ScoreLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.p2ScoreLabel.AutoSize = true;
             this.p2ScoreLabel.ForeColor = System.Drawing.Color.White;
             this.p2ScoreLabel.Location = new System.Drawing.Point(575, 9);
@@ -96,7 +103,7 @@ namespace pong
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(600, 400);
+            this.ClientSize = new System.Drawing.Size(600, 800);
             this.Controls.Add(this.p1ScoreLabel);
             this.Controls.Add(this.p2ScoreLabel);
             this.Controls.Add(this.buttonLabel);
@@ -104,8 +111,9 @@ namespace pong
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "Form1";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "Space Race";
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyUp);

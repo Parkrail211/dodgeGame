@@ -1,4 +1,13 @@
-﻿using System;
+﻿
+/*
+ * Parker Railton
+ * Mr. T
+ * March 24 2021
+ * 
+ * SPACE RACE:
+ * playerss have to dodge asteroids by moving up and down. you get one point whe nyou hit the top of the screen. whoever has the most points by the end wins.
+*/
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,25 +16,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Media;
 
 
 namespace pong
 {
     public partial class Form1 : Form
     {
-        int paddle1X = 200;
-
-
-
-        int paddle2X = 400;
-
-
-
+        
         int paddleWidth = 5;
         int paddleHeight = 5;
         int p1Score = 0;
         int p2Score = 0;
-
 
         int ballX = 100;
         int ballY = 390;
@@ -34,15 +36,13 @@ namespace pong
         int ballSpeed = 6;
         int paddleSpeed = 6;
 
-        int timeLeft = 0; 
+        int timeLeft = 0;
         int ballWidth = 10;
-        int ballHeight = 10;
+        int ballHeight = 25;
 
         List<int> asteroidsX = new List<int>();
         List<int> asteroidsY = new List<int>();
         List<int> asteroidsDirection = new List<int>();
-
-
 
         bool wDown = false;
         bool sDown = false;
@@ -51,17 +51,19 @@ namespace pong
         bool menu = true;
         bool gen = true;
 
-
         Random rnd = new Random();
-        SolidBrush blueBrush = new SolidBrush(Color.DodgerBlue);
-        SolidBrush blackBrush = new SolidBrush(Color.Black);
+
+        SoundPlayer boomPlayer = new SoundPlayer(Properties.Resources.boom);
+        SoundPlayer beepPlayer = new SoundPlayer(Properties.Resources.beep);
+
+        SolidBrush blueBrush = new SolidBrush(Color.SandyBrown);
         SolidBrush whiteBrush = new SolidBrush(Color.White);
 
         public Form1()
         {
             InitializeComponent();
         }
-
+        // check for key presses
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -113,24 +115,24 @@ namespace pong
             }
         }
 
-
-
         private void gameTimer_Tick(object sender, EventArgs e)
         {
-            if (timeLeft >= 400)
+            //check if the timer has run out
+            if (timeLeft >= this.Height)
             {
-                if (p1Score > p2Score) {openMenu("Player One Wins");}
+                if (p1Score > p2Score) { openMenu("Player One Wins"); }
                 else if (p1Score < p2Score) { openMenu("Player Two Wins"); }
                 else { openMenu("Tie"); }
 
             }
 
+            //generate asteroids
             if (gen)
             {
-                for (int loop = 0; loop <= 24; loop++)
+                for (int loop = 0; loop <= (this.Height - 100) / 10 - 10; loop++)
                 {
-                    asteroidsX.Add(rnd.Next(0, 601));
-                    asteroidsY.Add(rnd.Next(50, 351));
+                    asteroidsX.Add(rnd.Next(0, this.Width + 1));
+                    asteroidsY.Add(rnd.Next(50, this.Height - 49));
                     if (rnd.Next(0, 2) == 0)
                     {
                         asteroidsDirection.Add(-1);
@@ -143,13 +145,13 @@ namespace pong
                 }
             }
 
-            //move player 1 
+            //move players
             if (wDown == true && ballY > 0)
             {
                 ballY -= ballSpeed;
             }
 
-            if (sDown == true && ballY < 390)
+            if (sDown == true && ballY < this.Height - ballHeight)
             {
                 ballY += ballSpeed;
             }
@@ -159,7 +161,7 @@ namespace pong
                 ball2Y -= ballSpeed;
             }
 
-            if (downDown == true && ball2Y < 390)
+            if (downDown == true && ball2Y < this.Height - ballHeight)
             {
                 ball2Y += ballSpeed;
             }
@@ -171,15 +173,15 @@ namespace pong
 
             for (int loop = 0; loop < asteroidsX.Count(); loop++)
             {
-                if (asteroidsX[loop] <= 0 || asteroidsX[loop] >= 600)
+                if (asteroidsX[loop] <= 0 || asteroidsX[loop] >= this.Width)
                 {
                     asteroidsDirection[loop] = asteroidsDirection[loop] * -1;
                 }
             }
 
 
-            //create Rectangles of objects on screen to be used for collision detection
 
+            // draw rectanlges and chack for collision
             Rectangle ball = new Rectangle(ballX, ballY, ballWidth, ballHeight);
             Rectangle ball2 = new Rectangle(ball2X, ball2Y, ballWidth, ballHeight);
 
@@ -188,45 +190,47 @@ namespace pong
             {
                 Rectangle paddle1 = new Rectangle(asteroidsX[loop], asteroidsY[loop], paddleWidth, paddleHeight);
 
-
                 if (ball.IntersectsWith(paddle1))
                 {
-                    ballX = 100;
-                    ballY = 390;
+                    ballX = this.Width / 4;
+                    ballY = this.Height - ballHeight;
+                    boomPlayer.Play();
                 }
                 if (ball2.IntersectsWith(paddle1))
                 {
-                    ball2X = 500;
-                    ball2Y = 390;
+                    ball2X = (this.Width / 4) * 3;
+                    ball2Y = this.Height - ballHeight;
+                    boomPlayer.Play();
                 }
             }
 
+            //check if balls have hit the top of the forum
             if (ballY <= 0)
             {
                 p1Score++;
                 p1ScoreLabel.Text = $"{p1Score}";
-                ballX = 100;
-                ballY = 390;
+                ballX = this.Width / 4;
+                ballY = this.Height - ballHeight;
+                beepPlayer.Play();
             }
 
             if (ball2Y <= 0)
             {
                 p2Score++;
                 p2ScoreLabel.Text = $"{p2Score}";
-                ball2X = 500;
-                ball2Y = 390;
+                ball2X = (this.Width / 4) * 3;
+                ball2Y = this.Height - ballHeight;
+                beepPlayer.Play();
             }
 
 
 
-
-            //check if ball hits either paddle. If it does change the direction 
-            //and place the ball in front of the paddle hit 
+ 
 
 
             Refresh();
         }
-
+        //draw all shapes to the screen
         private void Form1_Paint(object sender, PaintEventArgs e)
         {
 
@@ -254,14 +258,14 @@ namespace pong
 
 
             }
-            e.Graphics.FillRectangle(whiteBrush, 296, timeLeft, 8, 400);
+            e.Graphics.FillRectangle(whiteBrush, this.Width / 2 - 4, timeLeft, 8, this.Height);
         }
-
+        //time limit for match
         private void timer_Tick(object sender, EventArgs e)
         {
             timeLeft++;
         }
-
+        //open and close menu
         private void openMenu(string text)
         {
             menu = true;
@@ -285,10 +289,12 @@ namespace pong
             gen = true;
             timer.Enabled = true;
 
-            ballX = 50;
-            ballY = 390;
-            ball2X = 500;
-            ball2Y = 390;
+            ballX = this.Width / 4;
+            ballY = this.Height - ballHeight;
+            ball2X = (this.Width / 4) * 3;
+            ball2Y = this.Height - ballHeight;
+
+            timer.Interval = 60;
 
         }
     }
